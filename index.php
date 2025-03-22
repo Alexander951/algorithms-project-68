@@ -6,69 +6,37 @@ use Hexlet\Code\Router;
 
 $router = new Router();
 
-$router->addRoute('GET', '/courses/:id', [
-    'body' => 'course!'
-]);
-
-$router->addRoute('POST', '/courses', [
-    'body' => 'created!'
-]);
-
-$router->addRoute('GET', '/courses', [
-    'body' => 'courses!'
+$router->addRoute('GET', '/courses/:course_id/exercises/:id', [
+    'body' => 'exercise!'
+], [
+    'id' => '\d+', // Ограничитель для id: только цифры
+    'course_id' => '^[a-z]+$' // Ограничитель для course_id: только буквы в нижнем регистре
 ]);
 
 // Пример запроса
-$request = ['path' => '/courses', 'method' => 'POST'];
+$request = ['path' => '/courses/js/exercises/1', 'method' => 'GET'];
 $result = $router->findRoute($request['method'], $request['path']);
 
-print_r($result);
-// => Array
-// => (
-// =>     [method] => POST
-// =>     [handler] => Array
-// =>         (
-// =>             [body] => created!
-// =>         )
-// =>
-// =>     [params] => Array
-// =>         (
-// =>         )
-// => )
+print_r(json_encode($result, JSON_PRETTY_PRINT));
+// => {
+// =>     "method": "GET",
+// =>     "handler": {
+// =>         "body": "exercise!"
+// =>     },
+// =>     "constraints": {
+// =>         "id": "\\d+",
+// =>         "course_id": "^[a-z]+$"
+// =>     },
+// =>     "params": {
+// =>         "course_id": "js",
+// =>         "id": "1"
+// =>     }
+// => }
 
-// Пример запроса для GET /courses
-$request = ['path' => '/courses', 'method' => 'GET'];
-$result = $router->findRoute($request['method'], $request['path']);
-
-print_r($result);
-// => Array
-// => (
-// =>     [method] => GET
-// =>     [handler] => Array
-// =>         (
-// =>             [body] => courses!
-// =>         )
-// =>
-// =>     [params] => Array
-// =>         (
-// =>         )
-// => )
-
-// Пример запроса для GET /courses/php_trees
-$request = ['path' => '/courses/php_trees', 'method' => 'GET'];
-$result = $router->findRoute($request['method'], $request['path']);
-
-print_r($result);
-// => Array
-// => (
-// =>     [method] => GET
-// =>     [handler] => Array
-// =>         (
-// =>             [body] => course!
-// =>         )
-// =>
-// =>     [params] => Array
-// =>         (
-// =>             [id] => php_trees
-// =>         )
-// => )
+// Пример запроса с ошибкой (id должен быть числом)
+try {
+    $request = ['path' => '/courses/js/exercises/js', 'method' => 'GET'];
+    $result = $router->findRoute($request['method'], $request['path']);
+} catch (\Exception $e) {
+    echo $e->getMessage(); // => No such path -- /courses/js/exercises/js
+}

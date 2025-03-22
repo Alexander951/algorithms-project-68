@@ -17,8 +17,9 @@ class Router
      * @param string $method HTTP-метод (например, "GET", "POST")
      * @param string $path Маршрут (например, "/courses/:id")
      * @param array $handler Обработчик маршрута
+     * @param array $constraints Ограничители для динамических сегментов
      */
-    public function addRoute(string $method, string $path, array $handler): void
+    public function addRoute(string $method, string $path, array $handler, array $constraints = []): void
     {
         $segments = $this->splitPath($path);
         $node = $this->root;
@@ -40,6 +41,9 @@ class Router
 
         // Сохраняем обработчик для указанного метода
         $node->handlers[$method] = $handler;
+
+        // Сохраняем ограничители для динамических сегментов
+        $node->constraints = $constraints;
     }
 
     /**
@@ -47,7 +51,7 @@ class Router
      *
      * @param string $method HTTP-метод (например, "GET", "POST")
      * @param string $path Запрашиваемый путь (например, "/courses/php_trees")
-     * @return array Результат (обработчик и параметры)
+     * @return array Результат (обработчик, параметры и ограничители)
      */
     public function findRoute(string $method, string $path): array
     {
@@ -61,9 +65,18 @@ class Router
             } elseif ($node->isDynamic) {
                 // Динамический сегмент
                 $params[$node->dynamicKey] = $segment;
+
+                // Проверяем ограничитель, если он задан
+                if (isset($node->constraints[$node->dynamicKey])) {
+                    $constraint = $node->constraints[$node->dynamicKey];
+                    if (!preg_match("/$constraint/", $segment)) {
+                        throw new \Exception("No such path -- $path");
+                    }
+                }
+
                 $node = $node->children['*'];
             } else {
-                throw new \Exception("Route not found for path: $path");
+                throw new \Exception("No such path -- $path");
             }
         }
 
@@ -75,6 +88,7 @@ class Router
         return [
             'method' => $method,
             'handler' => $node->handlers[$method],
+            'constraints' => $node->constraints,
             'params' => $params,
         ];
     }
