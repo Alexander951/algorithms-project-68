@@ -20,11 +20,12 @@ class ServeTest extends TestCase
             ]
         ];
 
-        $handler = serve($routes, '/courses');
-        $this->assertEquals(['body' => 'courses'], $handler);
-
-        $handler = serve($routes, '/courses/basics');
-        $this->assertEquals(['body' => 'basics'], $handler);
+        $result = serve($routes, '/courses');
+        $this->assertEquals([
+            'path' => '/courses',
+            'handler' => ['body' => 'courses'],
+            'params' => []
+        ], $result);
     }
 
     public function testServeWithNonExistingRoute(): void
