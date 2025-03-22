@@ -1,3 +1,5 @@
 /nbproject/
 
 /vendor/
+
+.phpunit.result.cache

@@ -2,7 +2,8 @@
 
 namespace Hexlet\Code;
 
-function serve(array $routes, string $request): array {
+function serve(array $routes, string $request): array
+{
     foreach ($routes as $route) {
         if (!isset($route['path']) || !isset($route['handler'])) {
             throw new \Exception("Invalid route configuration");
@@ -34,7 +35,8 @@ function serve(array $routes, string $request): array {
  * @param string $route Маршрут с плейсхолдерами (например, "/courses/:id")
  * @return string Регулярное выражение
  */
-function convertRouteToPattern(string $route): string {
+function convertRouteToPattern(string $route): string
+{
     // Заменяем плейсхолдеры на группы регулярных выражений
     $pattern = preg_replace('/:(\w+)/', '(\w+)', $route);
 
@@ -49,7 +51,8 @@ function convertRouteToPattern(string $route): string {
  * @param array $matches Результат сопоставления регулярного выражения
  * @return array Ассоциативный массив параметров
  */
-function extractParams(string $route, array $matches): array {
+function extractParams(string $route, array $matches): array
+{
     $params = [];
 
     // Находим все плейсхолдеры в маршруте
