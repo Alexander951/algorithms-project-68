@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<ruleset name="MyProject">
+    <description>Конфигурация линтера для проекта</description>
+    <!-- Указываем стандарт -->
+    <rule ref="PSR12"/>
+    <!-- Папки для проверки -->
+    <file>src/</file>
+    <!-- Исключения (если нужно) -->
+    <exclude-pattern>vendor/</exclude-pattern>
+    <!-- Дополнительные настройки (опционально) -->
+    <arg name="extensions" value="php"/>
+    <arg value="p"/><!-- Показывать прогресс -->
+</ruleset>
