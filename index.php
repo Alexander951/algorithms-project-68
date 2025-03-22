@@ -2,30 +2,24 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use function Hexlet\Code\serve;
+use Hexlet\Code\Router;
 
-$routes = [
-    [
-        'path' => '/courses/:id',
-        'handler' => [
-            'body' => 'course!'
-        ],
-    ],
-    [
-        'path' => '/courses/:course_id/exercises/:id',
-        'handler' => [
-            'body' => 'exercise!'
-        ],
-    ],
-];
+$router = new Router();
+
+$router->addRoute('/courses/:id', [
+    'body' => 'course!'
+]);
+
+$router->addRoute('/courses/:course_id/exercises/:id', [
+    'body' => 'exercise!'
+]);
 
 $path = '/courses/php_trees';
-$result = serve($routes, $path);
+$result = $router->findRoute($path);
 
 print_r($result);
 // => Array
 // => (
-// =>     [path] => /courses/:id
 // =>     [handler] => Array
 // =>         (
 // =>             [body] => course!
@@ -38,12 +32,11 @@ print_r($result);
 // => )
 
 $path = '/courses/js_functions/exercises/42';
-$result = serve($routes, $path);
+$result = $router->findRoute($path);
 
 print_r($result);
 // => Array
 // => (
-// =>     [path] => /courses/:course_id/exercises/:id
 // =>     [handler] => Array
 // =>         (
 // =>             [body] => exercise!
