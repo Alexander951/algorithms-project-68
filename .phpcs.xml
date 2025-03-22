@@ -9,5 +9,5 @@
     <exclude-pattern>vendor/</exclude-pattern>
     <!-- Дополнительные настройки (опционально) -->
     <arg name="extensions" value="php"/>
-    <arg value="p"/><!-- Показывать прогресс -->
+    <arg value="p"/> <!-- Показывать прогресс -->
 </ruleset>
