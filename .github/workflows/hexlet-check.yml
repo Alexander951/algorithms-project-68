@@ -22,13 +22,3 @@ jobs:
         uses: hexlet/project-action@release
         with:
           hexlet-id: ${{ secrets.HEXLET_ID }}
-          
-          
-      - name: Build and test
-        uses: hexlet/project-action@release
-        with:
-          hexlet-id: ${{ secrets.HEXLET_ID }}
-          verbose: false
-          mount-path: /var/tmp
-        env:
-          DOCKER_BUILDKIT: 0 # Отключает кэширование для теста
