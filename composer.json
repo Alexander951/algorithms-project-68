@@ -28,6 +28,7 @@
     "scripts": {
         "lint": "vendor/bin/phpcs",
         "fix": "vendor/bin/phpcbf",
-        "analyse": "vendor/bin/phpstan analyse"
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/phpunit"
     }
 }

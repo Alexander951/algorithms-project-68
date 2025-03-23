@@ -2,14 +2,6 @@
 
 namespace Hexlet\Code;
 
-class TrieNode
-{
-    public array $children = [];
-    public ?array $handler = null;
-    public bool $isDynamic = false;
-    public string $dynamicKey = '';
-}
-
 class Router
 {
     private TrieNode $root;
@@ -22,10 +14,11 @@ class Router
     /**
      * Добавляет маршрут в дерево.
      *
+     * @param string $method HTTP-метод (например, "GET", "POST")
      * @param string $path Маршрут (например, "/courses/:id")
      * @param array $handler Обработчик маршрута
      */
-    public function addRoute(string $path, array $handler): void
+    public function addRoute(string $method, string $path, array $handler): void
     {
         $segments = $this->splitPath($path);
         $node = $this->root;
@@ -45,16 +38,18 @@ class Router
             $node = $node->children[$segment];
         }
 
-        $node->handler = $handler;
+        // Сохраняем обработчик для указанного метода
+        $node->handlers[$method] = $handler;
     }
 
     /**
      * Ищет маршрут в дереве.
      *
+     * @param string $method HTTP-метод (например, "GET", "POST")
      * @param string $path Запрашиваемый путь (например, "/courses/php_trees")
      * @return array Результат (обработчик и параметры)
      */
-    public function findRoute(string $path): array
+    public function findRoute(string $method, string $path): array
     {
         $segments = $this->splitPath($path);
         $params = [];
@@ -72,12 +67,14 @@ class Router
             }
         }
 
-        if ($node->handler === null) {
-            throw new \Exception("Route not found for path: $path");
+        // Проверяем, есть ли обработчик для указанного метода
+        if (!isset($node->handlers[$method])) {
+            throw new \Exception("Method not allowed for path: $path");
         }
 
         return [
-            'handler' => $node->handler,
+            'method' => $method,
+            'handler' => $node->handlers[$method],
             'params' => $params,
         ];
     }

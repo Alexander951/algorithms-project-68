@@ -6,20 +6,62 @@ use Hexlet\Code\Router;
 
 $router = new Router();
 
-$router->addRoute('/courses/:id', [
+$router->addRoute('GET', '/courses/:id', [
     'body' => 'course!'
 ]);
 
-$router->addRoute('/courses/:course_id/exercises/:id', [
-    'body' => 'exercise!'
+$router->addRoute('POST', '/courses', [
+    'body' => 'created!'
 ]);
 
-$path = '/courses/php_trees';
-$result = $router->findRoute($path);
+$router->addRoute('GET', '/courses', [
+    'body' => 'courses!'
+]);
+
+// Пример запроса
+$request = ['path' => '/courses', 'method' => 'POST'];
+$result = $router->findRoute($request['method'], $request['path']);
 
 print_r($result);
 // => Array
 // => (
+// =>     [method] => POST
+// =>     [handler] => Array
+// =>         (
+// =>             [body] => created!
+// =>         )
+// =>
+// =>     [params] => Array
+// =>         (
+// =>         )
+// => )
+
+// Пример запроса для GET /courses
+$request = ['path' => '/courses', 'method' => 'GET'];
+$result = $router->findRoute($request['method'], $request['path']);
+
+print_r($result);
+// => Array
+// => (
+// =>     [method] => GET
+// =>     [handler] => Array
+// =>         (
+// =>             [body] => courses!
+// =>         )
+// =>
+// =>     [params] => Array
+// =>         (
+// =>         )
+// => )
+
+// Пример запроса для GET /courses/php_trees
+$request = ['path' => '/courses/php_trees', 'method' => 'GET'];
+$result = $router->findRoute($request['method'], $request['path']);
+
+print_r($result);
+// => Array
+// => (
+// =>     [method] => GET
 // =>     [handler] => Array
 // =>         (
 // =>             [body] => course!
@@ -28,23 +70,5 @@ print_r($result);
 // =>     [params] => Array
 // =>         (
 // =>             [id] => php_trees
-// =>         )
-// => )
-
-$path = '/courses/js_functions/exercises/42';
-$result = $router->findRoute($path);
-
-print_r($result);
-// => Array
-// => (
-// =>     [handler] => Array
-// =>         (
-// =>             [body] => exercise!
-// =>         )
-// =>
-// =>     [params] => Array
-// =>         (
-// =>             [course_id] => js_functions
-// =>             [id] => 42
 // =>         )
 // => )
