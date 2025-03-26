@@ -55,19 +55,20 @@ const findRoute = (trie, { path, method = 'GET' }) => {
       let matchedNode = null;
       for (const [, node] of current.children) {
         if (node.isDynamic) {
-          // Проверяем ограничение, если оно есть, иначе считаем его выполненным
           const constraintValid = !node.constraints || new RegExp(node.constraints).test(segment);
-
           if (constraintValid) {
+            // Если это последний сегмент, выбираем узел без проверки вложенности
+            if (i === segments.length - 1) {
+              matchedNode = node;
+              break;
+            }
+            // Иначе проверяем вложенность
             if (i + 1 < segments.length) {
               const nextSegment = segments[i + 1];
               if (node.children.has(nextSegment)) {
                 matchedNode = node;
                 break;
               }
-            } else {
-              matchedNode = node;
-              break;
             }
           }
         }

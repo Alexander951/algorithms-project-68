@@ -6,6 +6,7 @@ describe('Router', () => {
     { path: '/courses/basics', handler: { body: 'basics' } },
     { path: '/courses/:id', handler: { body: 'course' } },
     { path: '/courses/:course_id/exercises/:id', handler: { body: 'exercise' } },
+    { path: '/users/long/:id', method: 'POST', handler: { body: 'handler1' } }, // Добавлен маршрут из CI
   ];
 
   const app = router(routes);
@@ -40,7 +41,12 @@ describe('Router', () => {
     expect(() => app.serve('/courses/php_trees/exercises')).toThrow('Route not found');
   });
 
-  // Тесты для шага 5
+  test('should return handler and params for /users/long/:id with POST', () => {
+    const result = app.serve({ path: '/users/long/1', method: 'POST' });
+    expect(result.handler.body).toBe('handler1');
+    expect(result.params).toEqual({ id: '1' });
+  });
+
   describe('Constraints', () => {
     test('should return handler for route with valid constraints', () => {
       const constrainedRoutes = [
