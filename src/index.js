@@ -3,6 +3,7 @@ const createNode = () => ({
   handlers: new Map(),
   isDynamic: false,
   paramName: null,
+  constraints: null,
 });
 
 const buildTrie = (routes) => {
@@ -21,6 +22,9 @@ const buildTrie = (routes) => {
         if (isDynamic) {
           node.isDynamic = true;
           node.paramName = segment.slice(1);
+          if (route.constraints && route.constraints[node.paramName]) {
+            node.constraints = route.constraints[node.paramName];
+          }
         }
         current.children.set(key, node);
       }
@@ -44,26 +48,27 @@ const findRoute = (trie, { path, method = 'GET' }) => {
     const segment = segments[i];
     let found = false;
 
-    // Сначала проверяем статические сегменты
     if (current.children.has(segment)) {
       current = current.children.get(segment);
       found = true;
     } else {
-      // Проверяем все динамические узлы и выбираем подходящий по вложенности
       let matchedNode = null;
-      for (const [, node] of current.children) { // Заменили [key, node] на [, node]
+      for (const [, node] of current.children) {
         if (node.isDynamic) {
-          if (i + 1 < segments.length) {
-            // Есть следующий сегмент, проверяем, соответствует ли он дочернему узлу
-            const nextSegment = segments[i + 1];
-            if (node.children.has(nextSegment)) {
+          // Проверяем ограничение, если оно есть, иначе считаем его выполненным
+          const constraintValid = !node.constraints || new RegExp(node.constraints).test(segment);
+
+          if (constraintValid) {
+            if (i + 1 < segments.length) {
+              const nextSegment = segments[i + 1];
+              if (node.children.has(nextSegment)) {
+                matchedNode = node;
+                break;
+              }
+            } else {
               matchedNode = node;
               break;
             }
-          } else {
-            // Последний сегмент, выбираем узел без проверки вложенности
-            matchedNode = node;
-            break;
           }
         }
       }

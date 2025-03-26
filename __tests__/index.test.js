@@ -39,4 +39,33 @@ describe('Router', () => {
   test('should throw error for non-matching dynamic route', () => {
     expect(() => app.serve('/courses/php_trees/exercises')).toThrow('Route not found');
   });
+
+  // Тесты для шага 5
+  describe('Constraints', () => {
+    test('should return handler for route with valid constraints', () => {
+      const constrainedRoutes = [
+        {
+          path: '/courses/:course_id/exercises/:id',
+          handler: { body: 'exercise!' },
+          constraints: { id: '\\d+', course_id: '^[a-z]+$' },
+        },
+      ];
+      const constrainedRouter = router(constrainedRoutes);
+      const result = constrainedRouter.serve('/courses/js/exercises/1');
+      expect(result.handler.body).toBe('exercise!');
+      expect(result.params).toEqual({ course_id: 'js', id: '1' });
+    });
+
+    test('should throw error for route with invalid constraints', () => {
+      const constrainedRoutes = [
+        {
+          path: '/courses/:course_id/exercises/:id',
+          handler: { body: 'exercise!' },
+          constraints: { id: '\\d+', course_id: '^[a-z]+$' },
+        },
+      ];
+      const constrainedRouter = router(constrainedRoutes);
+      expect(() => constrainedRouter.serve('/courses/noop/exercises/js')).toThrow('Route not found');
+    });
+  });
 });
