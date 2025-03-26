@@ -6,7 +6,7 @@ describe('Router', () => {
     { path: '/courses/basics', handler: { body: 'basics' } },
     { path: '/courses/:id', handler: { body: 'course' } },
     { path: '/courses/:course_id/exercises/:id', handler: { body: 'exercise' } },
-    { path: '/users/long/:id', method: 'POST', handler: { body: 'handler1' } }, // Добавлен маршрут из CI
+    { path: '/users/long/:id', method: 'POST', handler: { body: 'handler1' } },
   ];
 
   const app = router(routes);
@@ -72,6 +72,16 @@ describe('Router', () => {
       ];
       const constrainedRouter = router(constrainedRoutes);
       expect(() => constrainedRouter.serve('/courses/noop/exercises/js')).toThrow('Route not found');
+    });
+
+    test('should return handler and params for /users/long/:id with POST', () => {
+      const postRoutes = [
+        { path: '/users/long/:id', method: 'POST', handler: { body: 'handler1' } },
+      ];
+      const postApp = router(postRoutes);
+      const result = postApp.serve({ path: '/users/long/1', method: 'POST' });
+      expect(result.handler.body).toBe('handler1');
+      expect(result.params).toEqual({ id: '1' });
     });
   });
 });
