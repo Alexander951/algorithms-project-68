@@ -32,7 +32,9 @@ const buildTrie = (routes) => {
     });
 
     const method = route.method || 'GET';
-    current.handlers.set(method, route.handler);
+    if (!current.handlers.has(method)) {
+      current.handlers.set(method, route.handler);
+    }
   });
 
   return root;
@@ -47,16 +49,15 @@ const findRoute = (trie, { path, method = 'GET' }) => {
     const segment = segments[i];
     let nextNode = null;
 
-    // 1. Проверяем статические дочерние узлы
+    // Проверяем статический узел
     if (current.staticChildren.has(segment)) {
       nextNode = current.staticChildren.get(segment);
-    }
-    // 2. Проверяем динамический узел
+    } 
+    // Проверяем динамический узел
     else if (current.dynamicChild) {
       const constraintValid = !current.dynamicChild.constraints || 
                            new RegExp(current.dynamicChild.constraints).test(segment);
       if (constraintValid) {
-        // Ключевое исправление - сохраняем параметр с правильным именем
         params[current.dynamicChild.paramName] = segment;
         nextNode = current.dynamicChild;
       }
@@ -72,61 +73,14 @@ const findRoute = (trie, { path, method = 'GET' }) => {
   return { handler, path, method, params };
 };
 
-
 export default (routes) => {
-  // Сортируем маршруты по специфичности (длинные пути сначала)
-  const sortedRoutes = [...routes].sort((a, b) => {
-    return b.path.split('/').length - a.path.split('/').length;
-  });
+  const trie = buildTrie(routes);
 
   const serve = (request) => {
     const normalizedRequest = typeof request === 'string' 
       ? { path: request, method: 'GET' } 
       : request;
-
-    // Пробуем каждый маршрут по порядку
-    for (const route of sortedRoutes) {
-      const routeSegments = route.path.split('/').filter(Boolean);
-      const pathSegments = normalizedRequest.path.split('/').filter(Boolean);
-
-      if (routeSegments.length !== pathSegments.length) continue;
-
-      const params = {};
-      let match = true;
-
-      for (let i = 0; i < routeSegments.length; i++) {
-        const routeSeg = routeSegments[i];
-        const pathSeg = pathSegments[i];
-
-        if (routeSeg.startsWith(':')) {
-          const paramName = routeSeg.slice(1);
-          // Проверяем constraints если есть
-          if (route.constraints && route.constraints[paramName]) {
-            if (!new RegExp(route.constraints[paramName]).test(pathSeg)) {
-              match = false;
-              break;
-            }
-          }
-          params[paramName] = pathSeg;
-        } else if (routeSeg !== pathSeg) {
-          match = false;
-          break;
-        }
-      }
-
-      if (match) {
-        const method = normalizedRequest.method || 'GET';
-        if (route.method && route.method !== method) continue;
-        return {
-          handler: route.handler,
-          path: normalizedRequest.path,
-          method,
-          params
-        };
-      }
-    }
-
-    throw new Error('Route not found');
+    return findRoute(trie, normalizedRequest);
   };
 
   return { serve };
