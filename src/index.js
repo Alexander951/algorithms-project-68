@@ -47,12 +47,16 @@ const findRoute = (trie, { path, method = 'GET' }) => {
     const segment = segments[i];
     let nextNode = null;
 
+    // 1. Проверяем статические дочерние узлы
     if (current.staticChildren.has(segment)) {
       nextNode = current.staticChildren.get(segment);
-    } else if (current.dynamicChild) {
+    }
+    // 2. Проверяем динамический узел
+    else if (current.dynamicChild) {
       const constraintValid = !current.dynamicChild.constraints || 
                            new RegExp(current.dynamicChild.constraints).test(segment);
       if (constraintValid) {
+        // Ключевое исправление - сохраняем параметр с правильным именем
         params[current.dynamicChild.paramName] = segment;
         nextNode = current.dynamicChild;
       }
@@ -67,6 +71,7 @@ const findRoute = (trie, { path, method = 'GET' }) => {
 
   return { handler, path, method, params };
 };
+
 
 export default (routes) => {
   // Сортируем маршруты по специфичности (длинные пути сначала)
